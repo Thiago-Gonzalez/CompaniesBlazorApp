@@ -1,0 +1,39 @@
+@page "/create"
+@using Models
+
+@inject CompaniesBlazorApp.Repository.ICompanyRepository CompanyRepository;
+@inject NavigationManager NavigationManager;
+
+<h1>Registrar Empresa</h1>
+
+<EditForm Model="company" OnValidSubmit="CreateCompany">
+    <div class="form-group mb-3">
+        <label for="companyName">Nome</label>
+        <InputText @bind-Value="company.Name" class="form-control" id="companyName"></InputText>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="companyPhone">Telefone</label>
+        <InputText @bind-Value="company.Phone" class="form-control" id="companyPhone"></InputText>
+    </div>
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <button class="btn btn-success" type="submit">Salvar</button>
+
+</EditForm>
+
+@code 
+{
+    Company company = new();
+
+    async Task CreateCompany()
+    {
+        company.GenerateNewId();
+
+        await CompanyRepository.Add(company);
+
+        NavigationManager.NavigateTo("/");
+    }
+}

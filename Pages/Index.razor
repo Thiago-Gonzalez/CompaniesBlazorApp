@@ -1,0 +1,60 @@
+﻿@page "/"
+
+@using CompaniesBlazorApp.Models;
+@inject IJSRuntime JSRuntime;
+@inject CompaniesBlazorApp.Repository.ICompanyRepository CompanyRepository;
+
+<PageTitle>Empresas</PageTitle>
+
+<h1>Empresas</h1>
+
+<a href="/create" class="btn btn-success">Registrar Empresa</a>
+
+<table class="table table-responsive table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Nome</th>
+            <th>Telefone</th>
+            <th>#</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (companies != null && companies.Count > 0)
+        {
+            foreach(var c in companies)
+            {
+                <tr>
+                    <td>@c.Id</td>
+                    <td>@c.Name</td>
+                    <td>@c.Phone</td>
+                    <td>
+                        <a href="/update/@c.Id" class="btn btn-warning">Atualizar</a>
+                        <button class="btn btn-danger" @onclick="async () => await DeleteCompany(c.Id)">Excluir</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    List<Company> companies = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        companies = await CompanyRepository.FindAll();
+    }
+
+    async Task DeleteCompany(Guid id)
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Tem certeza que deseja excluir?");
+        if (confirmed is false) return;
+
+        await CompanyRepository.Delete(id);
+
+        companies = await CompanyRepository.FindAll();
+
+        StateHasChanged();
+    }
+}
